@@ -16,7 +16,7 @@ class Program
         var connection = factory.CreateConnection();
         using var channel = connection.CreateChannel();
 
-        channel.QueueDeclare("camundaTask");
+        channel.QueueDeclare("camundaExternalTask");
         Console.WriteLine(" [*] Waiting for messages.");
 
         var consumer = new EventingBasicConsumer(channel);
@@ -26,12 +26,12 @@ class Program
             var message = Encoding.UTF8.GetString(body);
             var dto = JsonSerializer.Deserialize<CompleteExternalTaskDto>(message);
     
-            //Complete Camunda Task
+            //Complete External Task
             var camundaTask = new CamundaExternalTask();
             await camundaTask.CompleteExternalTask(dto);
         };
 
-        channel.BasicConsume(queue: "camundaTask", autoAck: true, consumer: consumer);
+        channel.BasicConsume(queue: "camundaExternalTask", autoAck: true, consumer: consumer);
         Console.WriteLine(" Press [enter] to exit.");
         Console.ReadKey();
     }
