@@ -19,23 +19,22 @@ public class CamundaExternalTask
         //Lock task worker
         await FetchAndLockExternalTask(dto.Topic);
         
+         var url = $"http://localhost:8080/engine-rest/external-task/{dto.Id}/complete";
+         var dtoJson = JsonSerializer.Serialize(dto);
+         var content = new StringContent(dtoJson, Encoding.UTF8, "application/json");
+         var response = await _httpClient.PostAsync(url, content);
+         var result = await response.Content.ReadAsStringAsync();
+         if (response.StatusCode is HttpStatusCode.OK or HttpStatusCode.NoContent)
+         {
+             Console.WriteLine("Task completed");
+         }
+         else
+         {
+             Console.WriteLine("Error: " + result);
+         }
         
-        //Complete task
-        var url = $"http://localhost:8080/engine-rest/external-task/{dto.Id}/complete";
-        var dtoJson = JsonSerializer.Serialize(dto);
-        var content = new StringContent(dtoJson, Encoding.UTF8, "application/json");
-        var response = await  _httpClient.PostAsync(url, content);
-        var result = response.Content.ReadAsStringAsync();
-        if (response.StatusCode == HttpStatusCode.OK)
-        {
-            Console.WriteLine("Task completed");
-        }
-        else
-        {
-            Console.WriteLine("Error: " + result);
-        }
-        //Unlock task worker
-        await UnlockExternalTask(dto.Id);
+        // Unlock task worker
+         await UnlockExternalTask(dto.Id);
     }
 
     private async Task FetchAndLockExternalTask(TopicDto topicDto)
@@ -52,12 +51,12 @@ public class CamundaExternalTask
         var url = "http://localhost:8080/engine-rest/external-task/fetchAndLock";
         var dtoJson = JsonSerializer.Serialize(dto);
         var content = new StringContent(dtoJson, Encoding.UTF8, "application/json");
-        await _httpClient.PostAsync(url, content);
+        var response = await _httpClient.PostAsync(url, content);
     }
 
     private async Task UnlockExternalTask(string id)
     {
         var url = $"http://localhost:8080/engine-rest/external-task/{id}/unlock";
-        await _httpClient.PostAsync(url, null);
+        var response = await _httpClient.PostAsync(url, null);
     }
 }
