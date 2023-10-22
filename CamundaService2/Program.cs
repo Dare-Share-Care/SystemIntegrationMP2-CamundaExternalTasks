@@ -20,7 +20,7 @@ class Program
         Console.WriteLine(" [*] Waiting for messages.");
 
         var consumer = new EventingBasicConsumer(channel);
-        consumer.Received += (model, eventArgs) =>
+        consumer.Received += async (model, eventArgs) =>
         {
             var body = eventArgs.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
@@ -28,7 +28,7 @@ class Program
     
             //Complete Camunda Task
             var camundaTask = new CamundaExternalTask();
-            // camundaTask.CompleteExternalTask(dto);
+            await camundaTask.CompleteExternalTask(dto);
         };
 
         channel.BasicConsume(queue: "camundaTask", autoAck: true, consumer: consumer);
